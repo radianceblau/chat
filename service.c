@@ -3,14 +3,15 @@
 #include <stdio.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>//x64 system use inet_ntoa(), must be include this file
 #include <string.h>
 
 
 int main()
 {
         int socket_fd, accept_socket_fd;
-        struct sockaddr_in server_listen_addr, client_addr;
-        unsigned short port_num = 0x8888;
+        struct sockaddr_in my_addr, client_addr;
+        unsigned short port_num = 8888;
         char send_buf[100];
 	int addr_len;
 
@@ -25,11 +26,11 @@ int main()
         printf("socket ok!\n");
 
         //bind address for listen
-        bzero(&server_listen_addr, sizeof(struct sockaddr_in));
-        server_listen_addr.sin_family = AF_INET;
-        server_listen_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-        server_listen_addr.sin_port = htons(port_num);
-        if(-1 == bind(socket_fd, (struct sockaddr *)(&server_listen_addr), sizeof(struct sockaddr_in)))
+        bzero(&my_addr, sizeof(struct sockaddr_in));
+        my_addr.sin_family = AF_INET;
+        my_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+        my_addr.sin_port = htons(port_num);
+        if(-1 == bind(socket_fd, (struct sockaddr *)(&my_addr), sizeof(struct sockaddr_in)))
         {
                 printf("bind failed!\n");
                 return -1;
@@ -45,13 +46,13 @@ int main()
         printf("listen ok!\n");
 
         //accept client connect request
-		addr_len = sizeof(struct sockaddr_in);
+		addr_len = sizeof(client_addr);
         if(-1 == (accept_socket_fd = accept(socket_fd, (struct sockaddr *)(&client_addr), &addr_len)))
         {
                 printf("accept failed!\n");
                 return -1;
         }
-        printf("accept ok! server accept clent:%#x:%#x\n", ntohl(client_addr.sin_addr.s_addr), ntohs(client_addr.sin_port));
+        printf("accept ok! server accept client ip: %s:%d \n", inet_ntoa(client_addr.sin_addr),  ntohs(client_addr.sin_port));
 
         while(1)
         {

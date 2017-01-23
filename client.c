@@ -8,7 +8,7 @@ int main(int argc, char **argv)
 {
         int socket_fd;
         struct sockaddr_in server_listen_addr;
-        unsigned short port_num = 0x8888;
+        unsigned short port_num = 8888;
         char recv_buf[100];
 
 	printf("client is runing!\n");
