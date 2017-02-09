@@ -1,15 +1,39 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <pthread.h>  
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <string.h>
+#include<errno.h>
+
+#define MSG_LEN	100
+
+char recv_buf[MSG_LEN];
+char send_buf[MSG_LEN];
+
+void handler_recv_msg(int *socket_fd)
+{
+	while(1)
+	{
+		memset(recv_buf, 0, sizeof(recv_buf));
+		if(-1 == read(*socket_fd, recv_buf, MSG_LEN))
+		{
+			printf("read data from socket failed:%d\n", errno);
+			return;
+		}
+		else
+		{
+			printf("%s\n", recv_buf);
+		}
+	}
+}
 
 int main(int argc, char **argv)
 {
         int socket_fd;
         struct sockaddr_in server_listen_addr;
         unsigned short port_num = 8888;
-        char recv_buf[100];
+		pthread_t pid;
 
 	printf("client is runing!\n");
 	if(argc != 2)
@@ -38,16 +62,18 @@ int main(int argc, char **argv)
                 return -1;
         }
         printf("connect ok!\n");
-
+	
+	pthread_create(&pid, NULL, (void*)handler_recv_msg, (void*)&socket_fd);
+	
 	while(1)
 	{
-		memset(recv_buf, 0, sizeof(recv_buf));
-		if(-1 == read(socket_fd, recv_buf, 100))
+		memset(send_buf, 0, sizeof(send_buf));
+		fgets(send_buf, MSG_LEN, stdin);
+		if(-1 == write(socket_fd, send_buf, MSG_LEN))
 		{
 			printf("read data from socket failed!\n");
 			return -1;
 		}
-		printf("%s\n", recv_buf);
 	}
 }
 

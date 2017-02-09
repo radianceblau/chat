@@ -7,12 +7,16 @@
 #include <string.h>
 
 
+#define MSG_LEN	100
+
+char recv_buf[MSG_LEN];
+char send_buf[MSG_LEN];
+
 int main()
 {
         int socket_fd, accept_socket_fd;
         struct sockaddr_in my_addr, client_addr;
         unsigned short port_num = 8888;
-        char send_buf[100];
 	int addr_len;
 
         printf("server is runing!\n");
@@ -56,6 +60,14 @@ int main()
 
         while(1)
         {
+				memset(recv_buf, 0, sizeof(recv_buf));
+				if(-1 == read(accept_socket_fd, recv_buf, MSG_LEN))
+				{
+					printf("read data from socket failed!\n");
+					continue;
+				}
+				printf("%s\n", recv_buf);
+		
                 memset(send_buf, 0, sizeof(send_buf));
                 sprintf(send_buf, "welcome to my server!");
                 send(accept_socket_fd, send_buf, strlen(send_buf), 0);
